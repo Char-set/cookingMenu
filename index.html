@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        <h1>模版表达式</h1>
+        <h3>{{msg}}</h3>
+        <br />
+
+        <h1>v-text 测试</h1>
+        <div v-text="msg"></div>
+        <br />
+
+        <h1>v-html 测试</h1>
+        <div v-html="testHtml"></div>
+        <br />
+
+        <h1>v-model 测试</h1>
+        <input type="text" v-model="msg">
+        <input type="text" v-model="count">
+        <br />
+
+        <h1>v-on 测试</h1>
+        <button v-on:click="handler">按钮</button>
+    </div>
+    <script src="./index.js" type="module"></script>
+</body>
+</html>
