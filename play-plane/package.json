@@ -1,0 +1,32 @@
+{
+  "name": "open-course",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "serve": "webpack-dev-server --open"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Char-set/cookingMenu.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Char-set/cookingMenu/issues"
+  },
+  "homepage": "https://github.com/Char-set/cookingMenu#readme",
+  "devDependencies": {
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "dependencies": {
+    "@vue/runtime-core": "^3.2.2",
+    "file-loader": "^6.2.0",
+    "pixi.js": "^6.1.1"
+  }
+}
