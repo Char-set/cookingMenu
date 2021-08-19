@@ -5,7 +5,7 @@ import planeImg from "../assets/plane.png";
 
 export default defineComponent({
     props: ["x", "y"],
-    setup(props, ctx) {
+    setup(props, { emit }) {
         console.log(props);
 
         // 响应式丢失
@@ -29,7 +29,12 @@ export default defineComponent({
         // 方案二
         // toRefs
 
-        const { x, y} = toRefs(props);
+        const { x, y } = toRefs(props);
+        window.addEventListener('keydown', e => {
+            if(e.code == 'Space') {
+                emit('attack', {x: x.value + 100, y: y.value})
+            }
+        })
         return {
             x,
             y
