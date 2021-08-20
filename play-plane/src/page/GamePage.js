@@ -8,13 +8,18 @@ import {game} from '../Game'
 
 import { hitTestObject } from "../utils/index";
 
+import { stage } from "../config";
+
+let hashCode = 0;
+const createHashCode = () => {
+  return hashCode++;
+};
+
 export default defineComponent({
     setup(props, ctx) {
         
+        // 我方飞机
         const { planeInfo } = useCreatePlane();
-
-        // 敌方飞机
-        const { enemyPlanes } = useCreateEnemyPlanes();
 
         // 我方子弹
         const { bullets, addBullet } = useCreateBullet();
@@ -24,41 +29,63 @@ export default defineComponent({
             addBullet(bulletInfo)
         }
 
-        useFighting(enemyPlanes, bullets, planeInfo, ctx);
+        // 敌方飞机
+        const { enemyPlanes } = useCreateEnemyPlanes();
+
+        // 敌方子弹
+        const { enemyBullets, onEnemyAttack } = useCreateEnemyBullets();
+
+        useFighting(enemyPlanes, bullets, enemyBullets, planeInfo, ctx);
 
         return {
             planeInfo,
             enemyPlanes,
             bullets,
-            onAttack
+            onAttack,
+            enemyBullets,
+            onEnemyAttack
         }
     },
     render(ctx,) {
         // 创建敌方飞机
         const createEnemyPlanes = () => {
             return ctx.enemyPlanes.map((info) => {
-                return h(EnemyPlane, {x: info.x, y: info.y})
+                return h(EnemyPlane, {x: info.x, y: info.y, onEnemyAttack: ctx.onEnemyAttack})
             })
         }
-
-        const createBullets = () => {
-            return ctx.bullets.map(bulletInfo => {
-                return h(Bullet, {x: bulletInfo.x, y: bulletInfo.y})
-            })
+        
+        const createBullets = (info, index) => {
+            return h(Bullet, {x: info.x, y: info.y, dir: info.dir, key: 'Bullet' + info.id})
         }
 
         return h("Container", [  
             h(Map),
             h(Plane, { x: ctx.planeInfo.x, y: ctx.planeInfo.y, onAttack: ctx.onAttack}),
             ...createEnemyPlanes(),
-            ...createBullets()
+            ...ctx.bullets.map(createBullets),
+            ...ctx.enemyBullets.map(createBullets),
         ])
     }
 })
+function useCreateEnemyBullets() {
+    const enemyBullets = reactive([]);
+
+    // 敌方飞机发射子弹
+    const onEnemyAttack = bulletInfo => {
+        enemyBullets.push({
+            ...bulletInfo,
+            width: 61, height: 99,
+            dir: 1,
+            id: createHashCode()
+        });
+    };
+    return { enemyBullets, onEnemyAttack };
+}
+
 // 抽离逻辑
 
 // 战斗逻辑
-function useFighting(enemyPlanes, bullets, planeInfo, ctx) {
+function useFighting(enemyPlanes, bullets, enemyBullets, planeInfo, ctx) {
     const handleTick = () => {
         // 主循环
         // 敌方飞机移动
@@ -70,6 +97,13 @@ function useFighting(enemyPlanes, bullets, planeInfo, ctx) {
         bullets.forEach((bulletInfo) => {
             bulletInfo.y--;
         });
+
+        // 敌方子弹移动
+        enemyBullets.forEach((bulletInfo) => {
+            bulletInfo.y += 2;
+        });
+
+
         // 碰撞检测
         enemyPlanes.forEach((enemyInfo) => {
             if (hitTestObject(enemyInfo, planeInfo)) {
@@ -87,10 +121,30 @@ function useFighting(enemyPlanes, bullets, planeInfo, ctx) {
                 }
             });
         });
+
+        // 敌方子弹和我方飞机碰撞检测
+        enemyBullets.forEach((bulletInfo, bulletIdx) => {
+            if(hitTestObject(bulletInfo, planeInfo)) {
+                console.log('hit');
+                ctx.emit('changePage', 'EndPage');
+            }
+        });
+
+        // 我方子弹和敌方子弹碰撞检测
+        bullets.forEach((bulletInfo, bulletIdx) => {
+            enemyBullets.forEach((enemyBulletInfo, enemyIdx) => {
+                if (hitTestObject(bulletInfo, enemyBulletInfo)) {
+                    bullets.splice(bulletIdx, 1);
+                    enemyBullets.splice(enemyIdx, 1);
+                }
+            });
+        });
+
     };
 
     onMounted(() => {
         game.ticker.add(handleTick);
+
     });
 
 
@@ -107,7 +161,9 @@ function useCreateBullet() {
         bullets.push({
             ...bulletInfo,
             width: 61,
-            height: 99
+            height: 99,
+            dir: -1,
+            id: createHashCode()
         })
     }
 
@@ -148,14 +204,22 @@ function useCreatePlane() {
 
 // 敌方飞机
 function useCreateEnemyPlanes() {
-    const enemyPlanes = reactive([
-        {
-            x: 50,
-            y: 0,
+
+    const createEnemyPlane = x => {
+        return {
+            x,
+            y: -200,
             width: 308,
             height: 207
         }
-    ]);
+    }
+
+    const enemyPlanes = reactive([]);
+
+    setInterval(() => {
+        let x = Math.floor((1 + stage.width) * Math.random());
+        enemyPlanes.push(createEnemyPlane(x));
+    }, 700);
 
     return {
         enemyPlanes
