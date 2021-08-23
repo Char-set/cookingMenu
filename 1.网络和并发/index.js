@@ -23,7 +23,8 @@ class PromiseQueue {
         }
 
         this.currentCount++;
-        const fn = this.pendingList.shift();
+        // const fn = this.pendingList.shift();
+        const { fn } = this.pendingList.sort((a, b) => b.priority - a.priority).shift();
 
         const promise = fn();
 
@@ -42,6 +43,22 @@ const queue = new PromiseQueue({
     concurrency: 3
 });
 
+const formatTask = url => {
+    return {
+        fn: () => loadImg(url),
+        priority: url.priority
+    }
+}
+
+
 urls.forEach(url => {
-    queue.add(() => loadImg(url));
-})
+    queue.add(formatTask(url));
+});
+
+const highPriorityTask = {
+    info: '高优先级任务！！！',
+    time: 1000,
+    priority: 10
+}
+
+queue.add(formatTask(highPriorityTask))
