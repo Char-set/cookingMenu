@@ -46,16 +46,19 @@ class EventEmitter {
 
 const ev = new EventEmitter();
 
-ev.on('add', (params) => {
-    console.log(`add ${params}`)
-});
+const clickFucCall = (params) => {
+    console.log(`click event params is ${params}`);
+}
+ev.on('click', clickFucCall)
 
-ev.once('add1', (params) => {
-    console.log(`add ${params}`)
-});
+ev.once('clickOnce', (params) => {
+    console.log(`clickOnce event params is ${params}`);
+})
 
-ev.emit('add', 123);
-ev.emit('add', 345);
+ev.emit('click', '第一次click触发');
+ev.emit('click', '第二次click触发');
+ev.off('click', clickFucCall);
+ev.emit('click', '第三次click触发');
 
-ev.emit('add1', 123);
-ev.emit('add1', 345);
+ev.emit('clickOnce', '第一次clickOnce触发');
+ev.emit('clickOnce', '第二次clickOnce触发');
